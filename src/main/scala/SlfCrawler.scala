@@ -7,9 +7,9 @@ object SlfCrawler extends App {
   var accessKeyId = config.getString("s3.accessKeyId")
   var secretAccessKey = config.getString("s3.secretAccessKey")
   var bucket = config.getString("s3.bucket")
+  var dataFile = new File(config.getString("local.dataFile"))
+  var indexFile = new File(config.getString("local.indexFile"))
 
-  val indexFile = new File("index.txt")
-  val dataFile = new File("data.json")
   val index = Index.load(indexFile)
 
   val s3 = new S3(bucket, accessKeyId, secretAccessKey)
