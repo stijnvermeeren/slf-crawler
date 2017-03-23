@@ -9,6 +9,7 @@ object SlfCrawler extends App {
   var bucket = config.getString("s3.bucket")
   var dataFile = new File(config.getString("local.dataFile"))
   var indexFile = new File(config.getString("local.indexFile"))
+  var tmpDir = new File(config.getString("local.tmpDir"))
 
   val index = Index.load(indexFile)
 
@@ -41,7 +42,7 @@ object SlfCrawler extends App {
 
   def crawlOne(s3: S3, image: Image, index: Set[String]): Option[Image] = {
     if (!index.contains(image.s3Key)) {
-      val tmpFile = SlfWebsite.downloadImage(image.url, "tmp/" + image.name)
+      val tmpFile = SlfWebsite.downloadImage(image.url, tmpDir + "/" + image.name)
       s3.save(image.s3Key, tmpFile)
       tmpFile.delete()
 
