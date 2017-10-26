@@ -15,32 +15,33 @@ object SlfCrawler extends App {
 
   val s3 = new S3(bucket, accessKeyId, secretAccessKey)
 
-  val newImages = crawlYear(s3, index, 2017)
+  // val newImages = crawlYear(s3, index, 2017)
+
+  // Crawl current year
+  val newImages = crawlYear(2018) flatMap { image =>
+    loadImage(s3, index)(image)
+  }
 
   val newIndex = index ++ newImages.map(_.s3Key)
   Index.save(indexFile)(newIndex)
   JsonData.saveToFile(dataFile, JsonData.fromIndex(newIndex))
   s3.save("data.json", dataFile)
 
-  def crawlCategory(s3: S3, index: Set[String], category: Category, years: Seq[Int]): Seq[Image] = {
-    years flatMap { year =>
-      SlfWebsite.listImages(year, category) flatMap { image =>
-        crawlOne(s3, image, index)
-      }
-    }
-  }
-
-  def crawlYear(s3: S3, index: Set[String], year: Int): Seq[Image] = {
+  def crawlYear(year: Int): Seq[Image] = {
     val categories = Seq(Depth, DepthAt2000m, FreshSnow1Day, FreshSnow3Days, RelativeDepth)
 
-    categories flatMap { category =>
-      SlfWebsite.listImages(year, category) flatMap { image =>
-        crawlOne(s3, image, index)
-      }
-    }
+    for {
+      yearUrl <- SlfWebsite.yearArchive(year).toSeq
+      category <- categories
+      categoryUrl <- SlfWebsite.categoryArchive(yearUrl, year, category).toSeq
+      languageUrl <- SlfWebsite.languageArchive(categoryUrl, year, category).toSeq
+      fileType <- category.fileTypes(year)
+      fileTypeUrl <- SlfWebsite.fileTypeArchive(languageUrl, year, category, fileType).toSeq
+      image <- SlfWebsite.crawlImages(fileTypeUrl, year, category)
+    } yield image
   }
 
-  def crawlOne(s3: S3, image: Image, index: Set[String]): Option[Image] = {
+  def loadImage(s3: S3, index: Set[String])(image: Image): Option[Image] = {
     if (!index.contains(image.s3Key)) {
       val tmpFile = SlfWebsite.downloadImage(image.url, tmpDir + "/" + image.name)
       s3.save(image.s3Key, tmpFile)
