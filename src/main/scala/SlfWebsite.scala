@@ -3,6 +3,7 @@ import java.net.URL
 
 import org.apache.commons.text.StringEscapeUtils
 
+import scala.util.Random
 import scala.io.Source
 import sys.process._
 
@@ -57,8 +58,9 @@ object SlfWebsite {
         StringEscapeUtils.unescapeHtml4(urlString)
     } find {
       _.startsWith(prefix)
-    } map {
-      relativeUrl => new URL(s"$baseDomain/$relativeUrl")
+    } map { relativeUrl =>
+      val cacheBust = Random.nextInt()
+      new URL(s"$baseDomain/$relativeUrl&cachebust=$cacheBust")
     }
   }
 

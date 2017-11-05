@@ -15,8 +15,6 @@ object SlfCrawler extends App {
 
   val s3 = new S3(bucket, accessKeyId, secretAccessKey)
 
-  // val newImages = crawlYear(s3, index, 2017)
-
   // Crawl current year
   val newImages = crawlYear(2018) flatMap { image =>
     loadImage(s3, index)(image)
