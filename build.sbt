@@ -15,3 +15,5 @@ libraryDependencies += "io.spray" %%  "spray-json" % "1.3.3"
 libraryDependencies += "com.typesafe" % "config" % "1.3.1"
 
 libraryDependencies += "org.apache.commons" % "commons-text" % "1.1"
+
+assemblyJarName in assembly := "slf-crawler.jar"
