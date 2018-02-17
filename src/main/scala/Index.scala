@@ -16,8 +16,11 @@ object Index {
 case class Image(
   year: Int,
   category: Category,
-  name: String,
+  dateString: String,
+  extension: String,
   url: URL
 ) {
-  val s3Key: String = s"$year/$category/$name"
+  val s3Key: String = s"$year/$category/$dateString.$extension"
+  val s3KeyOptimised: String = s"$year/$category/optimised/$dateString.png"
+  val s3KeyThumb: String = s"$year/$category/thumb/$dateString.png"
 }

@@ -21,7 +21,7 @@ trait Category {
   def matchHref(year: Int)(href: String): Option[Image] = {
     href match {
       case regex(dateYear, month, day, extension) =>
-        Some(Image(year, this, s"$dateYear-$month-$day.$extension", new URL(s"${SlfWebsite.baseDomain}/$href")))
+        Some(Image(year, this, s"$dateYear-$month-$day", extension, new URL(s"${SlfWebsite.baseDomain}/$href")))
       case _ =>
         None
     }
