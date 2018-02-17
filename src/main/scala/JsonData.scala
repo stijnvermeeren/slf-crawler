@@ -12,7 +12,8 @@ object JsonData {
         case List(_, category, _) => category
       } mapValues {
         _.toList.map{
-          case List(_, _, name) => name
+          case List(_, _, name) =>
+            name.dropRight(4) // drop extension
         }.sorted
       }
     }

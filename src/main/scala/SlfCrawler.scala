@@ -22,7 +22,7 @@ object SlfCrawler extends App {
   val newIndex = index ++ newImages.map(_.s3Key)
   Index.save(indexFile)(newIndex)
   JsonData.saveToFile(dataFile, JsonData.fromIndex(newIndex))
-  // s3.save("data.json", dataFile)
+  s3.save("data.json", dataFile)
 
   def crawlYear(year: Int): Seq[Image] = {
     val categories = Seq(Depth, DepthAt2000m, FreshSnow1Day, FreshSnow3Days, RelativeDepth)
@@ -59,6 +59,36 @@ object SlfCrawler extends App {
       Some(image)
     } else {
       None
+    }
+  }
+
+  /**
+    * Create optimised versions and thumbs for all images in the index that are stored on S3.
+    */
+  def migrateS3(s3: S3, index: Set[String]): Unit = {
+    index foreach { s3Key =>
+      println(s"Migrating $s3Key")
+      s3Key.split('/').toList match {
+        case List(year, category, name) =>
+          val dateString = name.dropRight(4)
+          val extension = name.takeRight(3)
+
+          val tmpFile = File.createTempFile(s"${category}_$dateString", s".$extension")
+          val tmpOptimisedFile = File.createTempFile(s"optimised_${category}_$dateString", ".png")
+          val tmpThumbFile = File.createTempFile(s"thumb_${category}_$dateString", ".png")
+
+          s3.load(s3Key, tmpFile)
+          ImageOptimisation.optimise(tmpFile.getPath, tmpOptimisedFile.getPath, resizeWidth = None)
+          ImageOptimisation.optimise(tmpFile.getPath, tmpThumbFile.getPath, resizeWidth = Some(100))
+
+          s3.save(s"$year/$category/$dateString.$extension", tmpFile)
+          s3.save(s"$year/$category/optimised/$dateString.png", tmpOptimisedFile)
+          s3.save(s"$year/$category/thumb/$dateString.png", tmpThumbFile)
+
+          tmpFile.delete()
+          tmpOptimisedFile.delete()
+          tmpThumbFile.delete()
+      }
     }
   }
 }

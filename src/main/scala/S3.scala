@@ -1,4 +1,5 @@
 import awscala._
+import com.amazonaws.services.s3.model.GetObjectRequest
 import s3._
 
 class S3(bucketName: String, accessKeyId: String, secretAccessKey: String) {
@@ -6,5 +7,9 @@ class S3(bucketName: String, accessKeyId: String, secretAccessKey: String) {
 
   def save(key: String, file: File): Unit = {
     s3.putObject(bucketName, key, file)
+  }
+
+  def load(key: String, file: File): Unit = {
+    s3.getObject(new GetObjectRequest(bucketName, key), file)
   }
 }
