@@ -29,20 +29,20 @@ object SlfWebsite {
     crawlForHrefWithPrefix(new URL("https://www.slf.ch/de/lawinenbulletin-und-schneesituation/archiv.html"), prefix)
   }
 
-  def categoryArchive(yearArchiveUrl: URL, year: Int, category: Category): Option[URL] = {
-    val prefix = s"de/lawinenbulletin-und-schneesituation/archiv.html?tx_wslavalanches_archiv%5Bpath%5D=%2Fuser_upload%2Fimport%2Flwdarchiv%2Fpublic%2F$year%2F${category.slfKey}"
+  def categoryArchive(yearArchiveUrl: URL, year: Int, slfKey: String): Option[URL] = {
+    val prefix = s"de/lawinenbulletin-und-schneesituation/archiv.html?tx_wslavalanches_archiv%5Bpath%5D=%2Fuser_upload%2Fimport%2Flwdarchiv%2Fpublic%2F$year%2F$slfKey"
 
     crawlForHrefWithPrefix(yearArchiveUrl, prefix)
   }
 
-  def languageArchive(categoryArchiveUrl: URL, year: Int, category: Category): Option[URL] = {
-    val prefix = s"de/lawinenbulletin-und-schneesituation/archiv.html?tx_wslavalanches_archiv%5Bpath%5D=%2Fuser_upload%2Fimport%2Flwdarchiv%2Fpublic%2F$year%2F${category.slfKey}%2F${category.lang(year)}"
+  def languageArchive(categoryArchiveUrl: URL, year: Int, slfKey: String, language: String): Option[URL] = {
+    val prefix = s"de/lawinenbulletin-und-schneesituation/archiv.html?tx_wslavalanches_archiv%5Bpath%5D=%2Fuser_upload%2Fimport%2Flwdarchiv%2Fpublic%2F$year%2F$slfKey%2F$language"
 
     crawlForHrefWithPrefix(categoryArchiveUrl, prefix)
   }
 
-  def fileTypeArchive(categoryArchiveUrl: URL, year: Int, category: Category, fileType: String): Option[URL] = {
-    val prefix = s"de/lawinenbulletin-und-schneesituation/archiv.html?tx_wslavalanches_archiv%5Bpath%5D=%2Fuser_upload%2Fimport%2Flwdarchiv%2Fpublic%2F$year%2F${category.slfKey}%2F${category.lang(year)}%2F$fileType"
+  def fileTypeArchive(categoryArchiveUrl: URL, year: Int, slfKey: String, language: String, fileType: String): Option[URL] = {
+    val prefix = s"de/lawinenbulletin-und-schneesituation/archiv.html?tx_wslavalanches_archiv%5Bpath%5D=%2Fuser_upload%2Fimport%2Flwdarchiv%2Fpublic%2F$year%2F$slfKey%2F$language%2F$fileType"
 
     crawlForHrefWithPrefix(categoryArchiveUrl, prefix)
   }

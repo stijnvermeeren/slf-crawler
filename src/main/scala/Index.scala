@@ -17,10 +17,18 @@ case class Image(
   year: Int,
   category: Category,
   dateString: String,
+  hourOfDay: Option[Int],
   extension: String,
   url: URL
 ) {
-  val s3Key: String = s"$year/$category/$dateString.$extension"
-  val s3KeyOptimised: String = s"$year/$category/optimised/$dateString.png"
-  val s3KeyThumb: String = s"$year/$category/thumb/$dateString.png"
+  private val fileName: String = {
+    hourOfDay match {
+      case Some(hour) => s"${dateString}_$hour"
+      case None => dateString
+    }
+  }
+
+  val s3Key: String = s"$year/$category/$fileName.$extension"
+  val s3KeyOptimised: String = s"$year/$category/optimised/$fileName.png"
+  val s3KeyThumb: String = s"$year/$category/thumb/$fileName.png"
 }

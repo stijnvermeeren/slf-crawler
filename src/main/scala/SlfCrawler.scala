@@ -25,15 +25,17 @@ object SlfCrawler extends App {
   s3.save("data.json", dataFile)
 
   def crawlYear(year: Int): Seq[Image] = {
-    val categories = Seq(Depth, DepthAt2000m, FreshSnow1Day, FreshSnow3Days, RelativeDepth)
+    val categories = Seq(RiskLevels, Depth, DepthAt2000m, FreshSnow1Day, FreshSnow3Days, RelativeDepth)
 
     for {
       yearUrl <- SlfWebsite.yearArchive(year).toSeq
       category <- categories
-      categoryUrl <- SlfWebsite.categoryArchive(yearUrl, year, category).toSeq
-      languageUrl <- SlfWebsite.languageArchive(categoryUrl, year, category).toSeq
+      slfKey <- category.slfKeys(year)
+      categoryUrl <- SlfWebsite.categoryArchive(yearUrl, year, slfKey).toSeq
+      language = category.lang(year)
+      languageUrl <- SlfWebsite.languageArchive(categoryUrl, year, slfKey, language).toSeq
       fileType <- category.fileTypes(year)
-      fileTypeUrl <- SlfWebsite.fileTypeArchive(languageUrl, year, category, fileType).toSeq
+      fileTypeUrl <- SlfWebsite.fileTypeArchive(languageUrl, year, slfKey, language, fileType).toSeq
       image <- SlfWebsite.crawlImages(fileTypeUrl, year, category)
     } yield image
   }
