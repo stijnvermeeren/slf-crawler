@@ -14,7 +14,6 @@ object Index {
 }
 
 case class Image(
-  year: Int,
   category: Category,
   dateString: String,
   hourOfDay: Option[Int],
@@ -28,7 +27,23 @@ case class Image(
     }
   }
 
-  val s3Key: String = s"$year/$category/$fileName.$extension"
-  val s3KeyOptimised: String = s"$year/$category/optimised/$fileName.png"
-  val s3KeyThumb: String = s"$year/$category/thumb/$fileName.png"
+  val s3Image: S3Image = S3Image(category.key, fileName, extension)
+}
+
+case class S3Image(
+  category: String,
+  fileName: String,
+  extension: String
+) {
+
+  val s3Key: String = s"$category/$fileName.$extension"
+  val s3KeyOptimised: String = s"$category/optimised/$fileName.png"
+  val s3KeyThumb: String = s"$category/thumb/$fileName.png"
+}
+
+object S3Image {
+  def fromIndex(indexKey: String): S3Image = {
+    val List(category, fileName, extension) = indexKey.split('/').flatMap(_.split('.')).toList
+    S3Image(category, fileName, extension)
+  }
 }

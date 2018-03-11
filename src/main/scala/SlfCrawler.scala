@@ -1,4 +1,5 @@
 import java.io.File
+import java.net.URL
 
 import com.typesafe.config.ConfigFactory
 
@@ -16,7 +17,7 @@ object SlfCrawler extends App {
 
   // Crawl current year
   val newImages = crawlYear(2018) flatMap { image =>
-    loadImage(s3, index)(image)
+    loadImage(s3, index)(image.url, image.s3Image)
   }
 
   val newIndex = index ++ newImages.map(_.s3Key)
@@ -40,13 +41,13 @@ object SlfCrawler extends App {
     } yield image
   }
 
-  def loadImage(s3: S3, index: Set[String])(image: Image): Option[Image] = {
+  def loadImage(s3: S3, index: Set[String])(url: URL, image: S3Image): Option[S3Image] = {
     if (!index.contains(image.s3Key)) {
-      val tmpFile = File.createTempFile(s"${image.category}_${image.dateString}", s".${image.extension}")
-      val tmpOptimisedFile = File.createTempFile(s"optimised_${image.category}_${image.dateString}", ".png")
-      val tmpThumbFile = File.createTempFile(s"thumb_${image.category}_${image.dateString}", ".png")
+      val tmpFile = File.createTempFile(s"${image.category}_${image.fileName}", s".${image.extension}")
+      val tmpOptimisedFile = File.createTempFile(s"optimised_${image.category}_${image.fileName}", ".png")
+      val tmpThumbFile = File.createTempFile(s"thumb_${image.category}_${image.fileName}", ".png")
 
-      SlfWebsite.downloadImage(image.url, tmpFile.getPath)
+      SlfWebsite.downloadImage(url, tmpFile.getPath)
       ImageOptimisation.optimise(tmpFile.getPath, tmpOptimisedFile.getPath, resizeWidth = None)
       ImageOptimisation.optimise(tmpFile.getPath, tmpThumbFile.getPath, resizeWidth = Some(100))
 

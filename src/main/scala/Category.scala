@@ -22,7 +22,6 @@ trait Category {
       case regex(dateYear, month, day, timeOfDay, slfKey, language, extension) if slfKeys(year).contains(slfKey) && lang(year) == language =>
         val hourOfDay = if (Option(timeOfDay).nonEmpty) Some(Integer.parseInt(timeOfDay) / 100) else None
         Some(Image(
-          year = year,
           category = this,
           dateString = s"$dateYear-$month-$day",
           hourOfDay = hourOfDay,

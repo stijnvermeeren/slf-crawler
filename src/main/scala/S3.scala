@@ -12,4 +12,8 @@ class S3(bucketName: String, accessKeyId: String, secretAccessKey: String) {
   def load(key: String, file: File): Unit = {
     s3.getObject(new GetObjectRequest(bucketName, key), file)
   }
+
+  def copy(oldKey: String, newKey: String): Unit = {
+    s3.copyObject(bucketName, oldKey, bucketName, newKey)
+  }
 }

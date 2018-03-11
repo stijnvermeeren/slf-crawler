@@ -6,16 +6,12 @@ import DefaultJsonProtocol._
 object JsonData {
   def fromIndex(index: Set[String]): JsValue = {
     val items = index.map(_.split('/').toList) groupBy {
-      case List(year, _, _) => year
+      case List(category, _) => category
     } mapValues {
-      _ groupBy {
-        case List(_, category, _) => category
-      } mapValues {
-        _.toList.map{
-          case List(_, _, name) =>
-            name.dropRight(4) // drop extension
-        }.sorted
-      }
+      _.toList.map{
+        case List(_, name) =>
+          name.dropRight(4) // drop extension
+      }.sorted
     }
 
     items.toJson
