@@ -2,6 +2,7 @@ import java.io.File
 import java.net.URL
 
 import com.typesafe.config.ConfigFactory
+import org.joda.time.DateTime
 
 object SlfCrawler extends App {
   val config = ConfigFactory.load()
@@ -15,8 +16,15 @@ object SlfCrawler extends App {
 
   val s3 = new S3(bucket, accessKeyId, secretAccessKey)
 
+  val now = new DateTime()
+  val year = if (now.getMonthOfYear > 7) {
+    now.getYear + 1
+  } else {
+    now.getYear
+  }
+
   // Crawl current year
-  val newImages = crawlYear(2018) flatMap { image =>
+  val newImages = crawlYear(year) flatMap { image =>
     loadImage(s3, index)(image.url, image.s3Image)
   }
 
