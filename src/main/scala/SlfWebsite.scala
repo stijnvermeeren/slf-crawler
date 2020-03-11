@@ -24,30 +24,42 @@ object SlfWebsite {
     * Returns a URL to the year archive page, and the year itself as an integer
     */
   def yearArchive(year: Int): Option[URL] = {
-    val prefix = s"de/lawinenbulletin-und-schneesituation/archiv.html?tx_wslavalanches_archiv%5Bpath%5D=%2Fuser_upload%2Fimport%2Flwdarchiv%2Fpublic%2F$year"
+    val substrings = Set(
+      "de/lawinenbulletin-und-schneesituation/archiv.html",
+      s"tx_wslavalanches_archiv%5Bpath%5D=%2Fuser_upload%2Fimport%2Flwdarchiv%2Fpublic%2F$year"
+    )
 
-    crawlForHrefWithPrefix(new URL("https://www.slf.ch/de/lawinenbulletin-und-schneesituation/archiv.html"), prefix)
+    crawlForHrefWithPrefix(new URL("https://www.slf.ch/de/lawinenbulletin-und-schneesituation/archiv.html"), substrings)
   }
 
   def categoryArchive(yearArchiveUrl: URL, year: Int, slfKey: String): Option[URL] = {
-    val prefix = s"de/lawinenbulletin-und-schneesituation/archiv.html?tx_wslavalanches_archiv%5Bpath%5D=%2Fuser_upload%2Fimport%2Flwdarchiv%2Fpublic%2F$year%2F$slfKey"
+    val substrings = Set(
+      "de/lawinenbulletin-und-schneesituation/archiv.html",
+      s"tx_wslavalanches_archiv%5Bpath%5D=%2Fuser_upload%2Fimport%2Flwdarchiv%2Fpublic%2F$year%2F$slfKey"
+    )
 
-    crawlForHrefWithPrefix(yearArchiveUrl, prefix)
+    crawlForHrefWithPrefix(yearArchiveUrl, substrings)
   }
 
   def languageArchive(categoryArchiveUrl: URL, year: Int, slfKey: String, language: String): Option[URL] = {
-    val prefix = s"de/lawinenbulletin-und-schneesituation/archiv.html?tx_wslavalanches_archiv%5Bpath%5D=%2Fuser_upload%2Fimport%2Flwdarchiv%2Fpublic%2F$year%2F$slfKey%2F$language"
+    val substrings = Set(
+      "de/lawinenbulletin-und-schneesituation/archiv.html",
+      s"tx_wslavalanches_archiv%5Bpath%5D=%2Fuser_upload%2Fimport%2Flwdarchiv%2Fpublic%2F$year%2F$slfKey%2F$language"
+    )
 
-    crawlForHrefWithPrefix(categoryArchiveUrl, prefix)
+    crawlForHrefWithPrefix(categoryArchiveUrl, substrings)
   }
 
   def fileTypeArchive(categoryArchiveUrl: URL, year: Int, slfKey: String, language: String, fileType: String): Option[URL] = {
-    val prefix = s"de/lawinenbulletin-und-schneesituation/archiv.html?tx_wslavalanches_archiv%5Bpath%5D=%2Fuser_upload%2Fimport%2Flwdarchiv%2Fpublic%2F$year%2F$slfKey%2F$language%2F$fileType"
+    val substrings = Set(
+      "de/lawinenbulletin-und-schneesituation/archiv.html",
+      s"tx_wslavalanches_archiv%5Bpath%5D=%2Fuser_upload%2Fimport%2Flwdarchiv%2Fpublic%2F$year%2F$slfKey%2F$language%2F$fileType"
+    )
 
-    crawlForHrefWithPrefix(categoryArchiveUrl, prefix)
+    crawlForHrefWithPrefix(categoryArchiveUrl, substrings)
   }
 
-  protected def crawlForHrefWithPrefix(url: URL, prefix: String): Option[URL] = {
+  protected def crawlForHrefWithPrefix(url: URL, substrings: Set[String]): Option[URL] = {
     val source = loadSource(url)
 
     val hrefRegex = """href="([^"]+)"""".r
@@ -56,11 +68,11 @@ object SlfWebsite {
     hrefMatches.toList map {
       case hrefRegex(urlString) =>
         StringEscapeUtils.unescapeHtml4(urlString)
-    } find {
-      _.startsWith(prefix)
+    } find { relativeUrl =>
+      substrings.forall(relativeUrl.contains)
     } map { relativeUrl =>
       val cacheBust = Random.nextInt()
-      new URL(s"$baseDomain/$relativeUrl&cachebust=$cacheBust")
+      new URL(s"$baseDomain$relativeUrl")
     }
   }
 
